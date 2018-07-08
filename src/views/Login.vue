@@ -42,6 +42,8 @@
           // 记录token  sessionStorage
           const { data: { token }} = data;
           sessionStorage.setItem('token', token);
+          // 跳转到Home.Vue页面中
+          this.$router.push({name: 'home'});
         } else {
           // 提示登录失败
           this.$message.error(msg);
