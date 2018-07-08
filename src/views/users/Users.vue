@@ -17,18 +17,117 @@
     </div>
 
     <!-- 列表详情 -->
+    <el-table
+      v-loading="loading"
+      :data="list"
+      border
+      stripe
+      style="width: 100%">
+      <el-table-column
+        type="index">
+      </el-table-column>
+      <el-table-column
+        prop="username"
+        label="姓名">
+      </el-table-column>
+      <el-table-column
+        prop="email"
+        label="邮箱">
+      </el-table-column>
+      <el-table-column
+        prop="mobile"
+        label="电话">
+      </el-table-column>
+      <el-table-column
+        label="创建日期">
+        <template slot-scope="scope">
+          {{ scope.row.create_time | fmtDate('YYYY-MM-DD') }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="mg_state"
+        label="用户状态">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="address"
+        label="操作"
+        width="200">
+        <template slot-scope="scope">
+          <el-button plain type="primary" icon="el-icon-edit" size="mini"></el-button>
+          <el-button plain type="danger" icon="el-icon-delete" size="mini"></el-button>
+          <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 分页 -->
     
-</el-card>
+  </el-card>
 </template>
 
 <script>
-  export default {
+export default {
+  data() {
+    return {
+      // 用户列表数据
+      list: [],
+      loading: true,
+      value1: true,
+      value2: true
+    };
+  },
+  created() {
+    this.loadData();
+  },
+  methods: {
+    // 发送给请求，获取用户列表数据
+    async loadData() {
+      // 发送异步之前
+      this.loading = true;
 
+      // 发送请求之前获取token
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        this.$router.push({name: 'login'});
+        this.$message.warning('您尚未登录，请登陆后再访问');
+      }
+      // 在请求头设置token
+      this.$http.defaults.headers.common['Authorization'] = token;
+
+      const res = await this.$http.get('users?pagenum=1&pagesize=20');
+
+      // 异步请求结束
+      this.loading = false;
+
+      // 获取相应数据
+      const data = res.data;
+      console.log(data);
+      // 获取meta中的msg  status
+      const {meta:{msg, status}} = data;
+      if (status === 200) {
+        const {data:{users}} = data;
+        // 将用户的值赋值给list
+        this.list = users;
+      } else {
+        this.$message.error(msg);
+      }
+    }
   }
+};
 </script>
 
 <style lang="">
   .searchInput {
-  width: 300px;
+    width: 300px;
+  }
+  .box-card {
+    height: 100%;
   }
 </style>

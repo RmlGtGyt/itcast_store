@@ -96,29 +96,29 @@
 </template>
 
 <script>
-  export default {
-    // 判断是否登录
-    beforeCreate() {
-      // 从sessionStorage中获取token，并判断是否有token
-      const token = sessionStorage.getItem('token');
-      if (!token) {
-        // 如果没有token，返回登录页面
-        this.$router.push({ name: 'login' });
-        // 提示用户登录后再访问
-        this.$message.warning('您尚未登陆，请登陆后访问');
-      };
-    },
-    methods: {
-      // 处理退出
-      handledLogout() {
-        // 删除sessionStorage中的token
-        sessionStorage.clear();
-        // 跳转到login页面
-        this.$router.push({name: 'login'});
-        this.$message.success('退出成功');
-      }
+export default {
+  // 判断是否登录
+  beforeCreate() {
+    // 从sessionStorage中获取token，并判断是否有token
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      // 如果没有token，返回登录页面
+      this.$router.push({ name: 'login' });
+      // 提示用户登录后再访问
+      this.$message.warning('您尚未登陆，请登陆后访问');
+    };
+  },
+  methods: {
+    // 处理退出
+    handledLogout() {
+      // 删除sessionStorage中的token
+      sessionStorage.clear();
+      // 跳转到login页面
+      this.$router.push({name: 'login'});
+      this.$message.success('退出成功');
     }
-  };
+  }
+};
 </script>
 
 <style lang="">

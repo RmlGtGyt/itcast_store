@@ -18,39 +18,39 @@
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        formData: {
-          username: '',
-          password: ''
-        }
+export default {
+  data () {
+    return {
+      formData: {
+        username: '',
+        password: ''
+      }
+    };
+  },
+  methods: {
+    // 点击按钮，登录
+    async handleLogin() {
+      const res = await this.$http.post('login', this.formData);
+      // 相当于在回调函数中书写代码
+      const data = res.data;
+      console.log(res);
+      console.log(data);
+      const {meta: {status, msg}} = data;
+      if (status === 200) {
+        // 提示登录成功
+        this.$message.success(msg);
+        // 记录token  sessionStorage
+        const {data: { token }} = data;
+        sessionStorage.setItem('token', token);
+        // 跳转到Home.Vue页面中
+        this.$router.push({name: 'home'});
+      } else {
+        // 提示登录失败
+        this.$message.error(msg);
       };
-    },
-    methods: {
-      // 点击按钮，登录
-      async handleLogin() {
-        const res = await this.$http.post('login', this.formData);
-        // 相当于在回调函数中书写代码
-        const data = res.data;
-        console.log(res);
-        console.log(data);
-        const { meta: { status, msg}} = data;
-        if (status === 200) {
-          // 提示登录成功
-          this.$message.success(msg);
-          // 记录token  sessionStorage
-          const { data: { token }} = data;
-          sessionStorage.setItem('token', token);
-          // 跳转到Home.Vue页面中
-          this.$router.push({name: 'home'});
-        } else {
-          // 提示登录失败
-          this.$message.error(msg);
-        };
-      },
     }
-  };
+  }
+};
 </script>
 
 <style lang="">
