@@ -13,7 +13,7 @@
         <el-button slot="append" icon="el-icon-search"></el-button>
       </el-input>
       <!-- 添加按钮 -->
-      <el-button type="success">添加按钮</el-button>
+      <el-button type="success" @click="loadAdd">添加用户</el-button>
     </div>
 
     <!-- 列表详情 -->
@@ -51,7 +51,8 @@
           <el-switch
             v-model="scope.row.mg_state"
             active-color="#13ce66"
-            inactive-color="#ff4949">
+            inactive-color="#ff4949"
+            @change="handleState(scope.row.id)">
           </el-switch>
         </template>
       </el-table-column>
@@ -61,14 +62,23 @@
         width="200">
         <template slot-scope="scope">
           <el-button plain type="primary" icon="el-icon-edit" size="mini"></el-button>
-          <el-button plain type="danger" icon="el-icon-delete" size="mini"></el-button>
+          <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(id)"></el-button>
           <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 分页 -->
-    
+    <el-pagination
+      background
+      :current-page="currentPage"
+      :page-size="pagesize"
+      layout="prev, pager, next, jumper, total, slot"
+      prev-text="上一页"
+      next-text="下一页"
+      @current-change="handleCurrent"
+      :total="total">
+    </el-pagination>
   </el-card>
 </template>
 
@@ -80,7 +90,11 @@ export default {
       list: [],
       loading: true,
       value1: true,
-      value2: true
+      value2: true,
+      total: '',
+      pagesize: 10,
+      currentPage: '',
+      AllCommodityList: ''
     };
   },
   created() {
@@ -101,7 +115,7 @@ export default {
       // 在请求头设置token
       this.$http.defaults.headers.common['Authorization'] = token;
 
-      const res = await this.$http.get('users?pagenum=1&pagesize=20');
+      const res = await this.$http.get(`users?pagenum=1&pagesize=${this.pagesize}`);
 
       // 异步请求结束
       this.loading = false;
@@ -110,14 +124,43 @@ export default {
       const data = res.data;
       console.log(data);
       // 获取meta中的msg  status
-      const {meta:{msg, status}} = data;
+      const { meta: {msg, status} } = data;
       if (status === 200) {
-        const {data:{users}} = data;
+        const { data: {users, total} } = data;
         // 将用户的值赋值给list
         this.list = users;
+        // 将total赋值给分页标签
+        this.total = total;
       } else {
         this.$message.error(msg);
       }
+    },
+    // 点击添加按钮，跳转页面
+    loadAdd() {
+      this.$router.push('/users/add');
+    },
+    // 点击状态按钮，修改显示状态
+    handleState(id) {
+      // 获取token
+      const token = sessionStorage.getItem('token');
+      // 在请求头中设置token
+      // this.$http.defaults.headers.common['Authorization'] = token;
+
+      // // 发送请求，获取数据
+      // const res = await this.$http.get(`users/:uId=${id}/state/:${}`);
+
+      // const data = res.data;
+      console.log(id);
+    },
+    // 当点击删除按钮时，发送请求删除数据
+    async handleDelete(id) {
+      // const res = await this.$http.
+    },
+    // 当前页码发生改变时触发
+    handleCurrent(val) {
+      // 获取当前页码
+      const currentPage = val;
+      console.log(currentPage);
     }
   }
 };

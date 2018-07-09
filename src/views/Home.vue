@@ -84,7 +84,6 @@
             </el-menu-item>
           </el-submenu>
         </el-menu>
-      </el-col>
       </el-aside>
       <!-- 列表部分 -->
       <el-main class="main">
