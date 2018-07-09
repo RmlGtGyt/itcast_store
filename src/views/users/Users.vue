@@ -52,7 +52,7 @@
             v-model="scope.row.mg_state"
             active-color="#13ce66"
             inactive-color="#ff4949"
-            @change="handleState(scope.row.id)">
+            @change="handleState(scope.row.id, scope.row.mg_state)">
           </el-switch>
         </template>
       </el-table-column>
@@ -122,13 +122,14 @@ export default {
 
       // 获取相应数据
       const data = res.data;
-      console.log(data);
       // 获取meta中的msg  status
       const { meta: {msg, status} } = data;
       if (status === 200) {
         const { data: {users, total} } = data;
         // 将用户的值赋值给list
         this.list = users;
+        // 为state赋值
+        this.state = users.mg_state;
         // 将total赋值给分页标签
         this.total = total;
       } else {
@@ -140,17 +141,26 @@ export default {
       this.$router.push('/users/add');
     },
     // 点击状态按钮，修改显示状态
-    handleState(id) {
+    async handleState(id, state) {
+      console.log(state);
+      console.log(typeof id);
+      console.log(id);
       // 获取token
       const token = sessionStorage.getItem('token');
       // 在请求头中设置token
-      // this.$http.defaults.headers.common['Authorization'] = token;
+      this.$http.defaults.headers.common['Authorization'] = token;
 
       // // 发送请求，获取数据
-      // const res = await this.$http.get(`users/:uId=${id}/state/:${}`);
-
-      // const data = res.data;
-      console.log(id);
+      const res = await this.$http.put(`users/${id}/state/${state}`);
+      const data = res.data;
+      const { meta: {msg, status}} = data;
+      if (status === 200) {
+        this.$message.success('用户状态修改成功');
+        // 刷新页面
+        this.loadData();
+      } else {
+        console.log(msg);
+      }
     },
     // 当点击删除按钮时，发送请求删除数据
     async handleDelete(id) {
