@@ -62,7 +62,7 @@
         width="200">
         <template slot-scope="scope">
           <el-button plain type="primary" icon="el-icon-edit" size="mini"></el-button>
-          <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(id)"></el-button>
+          <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
         </template>
       </el-table-column>
@@ -142,9 +142,6 @@ export default {
     },
     // 点击状态按钮，修改显示状态
     async handleState(id, state) {
-      console.log(state);
-      console.log(typeof id);
-      console.log(id);
       // 获取token
       const token = sessionStorage.getItem('token');
       // 在请求头中设置token
@@ -164,7 +161,22 @@ export default {
     },
     // 当点击删除按钮时，发送请求删除数据
     async handleDelete(id) {
-      // const res = await this.$http.
+      // 获取token
+      const token = sessionStorage.getItem('token');
+      // 在请求头中设置token
+      this.$http.defaults.headers.common['Authorization'] = token;
+      // 发送请求删除数据
+      const res = await this.$http.delete(`users/${id}`);
+
+      const data = res.data;
+      const { meta: {msg, status}} = data;
+      if (status === 200) {
+        this.$message.success('用户删除成功');
+        // 刷新页面
+        this.loadData();
+      } else {
+        console.log(msg);
+      }
     },
     // 当前页码发生改变时触发
     handleCurrent(val) {
