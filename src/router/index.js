@@ -5,6 +5,7 @@ import Login from '@/views/Login';
 import Home from '@/views/Home';
 import Users from '@/views/users/Users';
 import UsersAdd from '@/views/users/UsersAdd';
+import UsersEdit from '@/views/users/UsersEdit';
 
 Vue.use(Router);
 
@@ -20,18 +21,20 @@ export default new Router({
       path: '/',
       component: Home,
       children: [
-        {name: 'users',
+        {
+          name: 'users',
           path: '/users',
-          component: Users
-        },
-        {name: 'users',
-          path: '/users/:uId/state/:type',
           component: Users
         },
         {
           name: 'usersAdd',
           path: '/users/add',
           component: UsersAdd
+        },
+        {
+          name: 'usersEdit',
+          path: '/users/edit/:id',
+          component: UsersEdit
         }
       ]
     }

@@ -1,5 +1,5 @@
 <template>
-   <el-card class="box-card">
+  <el-card class="box-card">
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -52,6 +52,7 @@
         </el-input>
       </div>
       <el-button type="success" class="addButton" @click="handleAdd">确认添加</el-button>
+      <el-button type="primary" class="addButton" @click="handleCancel">取消</el-button>
     </form>
   </el-card>
 </template>
@@ -96,6 +97,10 @@ export default {
       } else {
         this.$message.error(msg);
       };
+    },
+    // 点击取消按钮，返回用户列表页面
+    handleCancel() {
+      this.$router.push({name: 'users'});
     }
   }
 };

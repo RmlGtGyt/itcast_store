@@ -61,7 +61,7 @@
         label="操作"
         width="200">
         <template slot-scope="scope">
-          <el-button plain type="primary" icon="el-icon-edit" size="mini"></el-button>
+          <el-button plain type="primary" icon="el-icon-edit" size="mini" @click="loadEdit(scope.row.id)"></el-button>
           <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
         </template>
@@ -139,6 +139,10 @@ export default {
     // 点击添加按钮，跳转页面
     loadAdd() {
       this.$router.push('/users/add');
+    },
+    // 点击编辑按钮，跳转到编辑页面
+    loadEdit(id) {
+      this.$router.push(`/users/edit/${id}`);
     },
     // 点击状态按钮，修改显示状态
     async handleState(id, state) {
