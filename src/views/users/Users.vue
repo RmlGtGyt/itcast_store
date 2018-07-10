@@ -9,9 +9,17 @@
 
     <!-- 搜索区域 -->
     <div style="margin-top: 15px;">
-      <el-input placeholder="请输入内容" class="searchInput" clearable>
+      <el-autocomplete
+        popper-class="my-autocomplete"
+        custom-item="my-remote"
+        v-model="state"
+        :fetch-suggestions="querySearch"
+        placeholder="请输入搜索内容"
+        icon="clone"
+        class="searchInput"
+        :on-icon-click="handleIconClick">
         <el-button slot="append" icon="el-icon-search"></el-button>
-      </el-input>
+      </el-autocomplete>
       <!-- 添加按钮 -->
       <el-button type="success" @click="loadAdd">添加用户</el-button>
     </div>
@@ -70,13 +78,12 @@
 
     <!-- 分页 -->
     <el-pagination
-      background
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
       :current-page="currentPage"
+      :page-sizes="[2, 3, 4, 5]"
       :page-size="pagesize"
-      layout="prev, pager, next, jumper, total, slot"
-      prev-text="上一页"
-      next-text="下一页"
-      @current-change="handleCurrent"
+      layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
   </el-card>
@@ -89,12 +96,9 @@ export default {
       // 用户列表数据
       list: [],
       loading: true,
-      value1: true,
-      value2: true,
-      total: '',
-      pagesize: 10,
-      currentPage: '',
-      AllCommodityList: ''
+      total: '',   // 数据总条数
+      pagesize: 4,  //每页显示的数据
+      currentPage: 1   //当前显示的页码
     };
   },
   created() {
@@ -115,7 +119,7 @@ export default {
       // 在请求头设置token
       this.$http.defaults.headers.common['Authorization'] = token;
 
-      const res = await this.$http.get(`users?pagenum=1&pagesize=${this.pagesize}`);
+      const res = await this.$http.get(`users?pagenum=${this.currentPage}&pagesize=${this.pagesize}`);
 
       // 异步请求结束
       this.loading = false;
@@ -182,11 +186,20 @@ export default {
         console.log(msg);
       }
     },
-    // 当前页码发生改变时触发
-    handleCurrent(val) {
-      // 获取当前页码
-      const currentPage = val;
-      console.log(currentPage);
+    // 当搜索框中的值发生变化时
+    handleSelect(item) {
+      console.log(item);
+    },
+    // 分页
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.loadData();
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.loadData();
+      console.log(`当前页: ${val}`);
     }
   }
 };

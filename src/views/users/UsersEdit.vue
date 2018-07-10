@@ -15,6 +15,7 @@
         <el-input
           clearable
           autofocus
+          :disabled="true"
           v-model="formData.username"
           class="userInput">
         </el-input>
