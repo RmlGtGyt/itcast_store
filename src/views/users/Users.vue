@@ -14,7 +14,30 @@
       </el-input>
       <!-- 添加按钮 -->
       <el-button type="success" @click="loadAdd">添加用户</el-button>
+      <el-button type="success" @click="dialogFormVisible = true">添加用户（弹出框）</el-button>
     </div>
+
+    <!-- 添加新用户 -->
+    <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
+      <el-form :model="formData" :label-width="formLabelWidth">
+        <el-form-item label="用户名">
+          <el-input v-model="formData.username" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="formData.password" type="password" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="formData.email" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="formData.mobile" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAddDialog">确 定</el-button>
+      </div>
+    </el-dialog>
 
     <!-- 列表详情 -->
     <el-table
@@ -61,6 +84,9 @@
         label="操作"
         width="200">
         <template slot-scope="scope">
+          <!-- 编辑的两种方式：弹出层和新建页面 -->
+          <!-- <el-button plain type="primary" icon="el-icon-edit" size="mini" @click="loadEditNew(scope.row.id)"></el-button> -->
+          <!-- 弹出框的方式 -->
           <el-button plain type="primary" icon="el-icon-edit" size="mini" @click="loadEdit(scope.row.id)"></el-button>
           <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(scope.row.id)"></el-button>
           <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
@@ -95,7 +121,17 @@ export default {
       // 当前显示的页码
       currentPage: 1,
       // 用户输入的内容
-      userSearchValue: ''
+      userSearchValue: '',
+      // 弹出框显示状态初始值
+      dialogFormVisible: false,
+      // 弹出框的高度
+      formLabelWidth: '80px',
+      formData: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      }
     };
   },
   created() {
@@ -142,7 +178,7 @@ export default {
       this.$router.push('/users/add');
     },
     // 点击编辑按钮，跳转到编辑页面
-    loadEdit(id) {
+    loadEditNew(id) {
       this.$router.push(`/users/edit/${id}`);
     },
     // 点击状态按钮，修改显示状态
@@ -161,27 +197,42 @@ export default {
         // 刷新页面
         this.loadData();
       } else {
-        console.log(msg);
+        this.$message.error(msg);
       }
     },
     // 当点击删除按钮时，发送请求删除数据
     async handleDelete(id) {
-      // 获取token
-      const token = sessionStorage.getItem('token');
-      // 在请求头中设置token
-      this.$http.defaults.headers.common['Authorization'] = token;
-      // 发送请求删除数据
-      const res = await this.$http.delete(`users/${id}`);
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        // 获取token
+        const token = sessionStorage.getItem('token');
+        // 在请求头中设置token
+        this.$http.defaults.headers.common['Authorization'] = token;
+        // 发送请求删除数据
+        const res = await this.$http.delete(`users/${id}`);
 
-      const data = res.data;
-      const {meta: {msg, status}} = data;
-      if (status === 200) {
-        this.$message.success('用户删除成功');
-        // 刷新页面
-        this.loadData();
-      } else {
-        console.log(msg);
-      }
+        const data = res.data;
+        const {meta: {msg, status}} = data;
+        if (status === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          // 刷新页面
+          this.currentPage = 1;
+          this.loadData();
+        } else {
+          this.$message.error(msg);
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     },
     // 分页
     handleSizeChange(val) {
@@ -196,6 +247,25 @@ export default {
     handleSearchValue(userSearchValue) {
       this.userSearchValue = userSearchValue;
       this.loadData();
+    },
+    // 弹出层方式添加新用户
+    async handleAddDialog() {
+      // 发送添加请求
+      const res = await this.$http.post('users', this.formData);
+      const data = res.data;
+      const {meta: {msg, status}} = data;
+      // 判断添加状态
+      if (status === 201) {
+        this.$message.success('用户数据添加成功');
+        // 关闭添加框弹出层
+        this.dialogFormVisible = false;
+        // 清空表单数据
+        for (let key in this.formData) {
+          this.formData[key] = '';
+        }
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
