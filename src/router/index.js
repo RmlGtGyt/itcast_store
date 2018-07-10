@@ -6,6 +6,8 @@ import Home from '@/views/Home';
 import Users from '@/views/users/Users';
 import UsersAdd from '@/views/users/UsersAdd';
 import UsersEdit from '@/views/users/UsersEdit';
+import Roles from '@/views/roles/Roles';
+import Rights from '@/views/roles/Rights';
 
 Vue.use(Router);
 
@@ -35,6 +37,16 @@ export default new Router({
           name: 'usersEdit',
           path: '/users/edit/:id',
           component: UsersEdit
+        },
+        {
+          name: 'roles',
+          path: '/roles',
+          component: Roles
+        },
+        {
+          name: 'rights',
+          path: '/rights',
+          component: Rights
         }
       ]
     }
