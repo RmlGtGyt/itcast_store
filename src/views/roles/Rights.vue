@@ -9,6 +9,7 @@
 
     <!-- 表格展示部分 -->
     <el-table
+      v-loading="loading"
       class="rolesList"
       border
       height="400px"
@@ -44,7 +45,8 @@
 export default {
   data() {
     return {
-      roles: []
+      roles: [],
+      loading: true
     };
   },
   created() {
@@ -54,19 +56,10 @@ export default {
     async rolesShowData() {
        // 发送异步之前
       this.loading = true;
-
-      // 发送请求之前获取token
-      const token = sessionStorage.getItem('token');
-      if (!token) {
-        this.$router.push({name: 'login'});
-        this.$message.warning('您尚未登录，请登陆后再访问');
-      }
-      // 在请求头设置token
-      this.$http.defaults.headers.common['Authorization'] = token;
-
       const res = await this.$http.get('rights/list');
       console.log(res);
       this.roles = res.data.data;
+      this.loading = false;
     }
   }
 }

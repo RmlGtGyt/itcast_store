@@ -209,8 +209,6 @@ export default {
         this.$router.push({name: 'login'});
         this.$message.warning('您尚未登录，请登陆后再访问');
       }
-      // 在请求头设置token
-      this.$http.defaults.headers.common['Authorization'] = token;
 
       const res = await this.$http.get(`users?pagenum=${this.currentPage}&pagesize=${this.pagesize}&query=${this.userSearchValue}`);
 
@@ -269,11 +267,6 @@ export default {
     },
     // 点击状态按钮，修改显示状态
     async handleState(id, state) {
-      // 获取token
-      const token = sessionStorage.getItem('token');
-      // 在请求头中设置token
-      this.$http.defaults.headers.common['Authorization'] = token;
-
       // // 发送请求，获取数据
       const res = await this.$http.put(`users/${id}/state/${state}`);
       const data = res.data;
@@ -293,10 +286,6 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        // 获取token
-        const token = sessionStorage.getItem('token');
-        // 在请求头中设置token
-        this.$http.defaults.headers.common['Authorization'] = token;
         // 发送请求删除数据
         const res = await this.$http.delete(`users/${id}`);
 

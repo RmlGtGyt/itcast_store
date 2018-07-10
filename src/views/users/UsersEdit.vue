@@ -62,10 +62,6 @@ export default {
   methods: {
     // 发送请求根据路由中的id获取编辑用户的数据
     async loadData() {
-      // 获取token
-      const token = sessionStorage.getItem('token');
-      // 在请求头中发送token
-      this.$http.defaults.headers.common['Authorization'] = token;
       // 获取当前路由中发送过来的id
       const id = this.$route.params.id;
       // 根据id查询数据
@@ -81,10 +77,6 @@ export default {
     },
     // 点击确认修改按钮，处理修改请求
     async handleEdit(id) {
-      // 获取token
-      const token = sessionStorage.getItem('token');
-      // 在请求头中发送token
-      this.$http.defaults.headers.common['Authorization'] = token;
       // 发送请求，处理修改
       const res = await this.$http.put(`users/${id}`, this.formData);
       const data = res.data;
