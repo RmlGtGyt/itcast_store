@@ -89,16 +89,16 @@
           <!-- 弹出框的方式 -->
           <el-button plain type="primary" icon="el-icon-edit" size="mini" @click="loadEdit(scope.row)"></el-button>
           <el-button plain type="danger" icon="el-icon-delete" size="mini" @click="handleDelete(scope.row.id)"></el-button>
-          <el-button plain type="success" icon="el-icon-check" size="mini"></el-button>
+          <el-button plain type="success" icon="el-icon-check" size="mini" @click="rolesShowtDialog(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 弹出层编辑用户信息 -->
-    <el-dialog title="编辑用户" :visible.sync="rolesFormVisible">
+    <el-dialog title="编辑用户" :visible.sync="dialogFormVisibleEdit" @closed="closeClear">
       <el-form :model="formData" :label-width="formLabelWidth">
-        <el-form-item label="当前用户">
-          {{ formData.username }}
+        <el-form-item label="用户名">
+          <el-input v-model="formData.username" auto-complete="off" disabled></el-input>
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="formData.email" auto-complete="off"></el-input>
@@ -114,21 +114,24 @@
     </el-dialog>
 
     <!-- 分配角色 -->
-    <el-dialog title="分配角色" :visible.sync="dialogFormVisibleEdit" @closed="closeClear">
-      <el-form :model="formData" :label-width="formLabelWidth">
-        <el-form-item label="用户名">
-          <el-input v-model="formData.username" auto-complete="off" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="formData.email" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="formData.mobile" auto-complete="off"></el-input>
-        </el-form-item>
+    <el-dialog title="分配角色" :visible.sync="rolesFormVisible">
+      <el-form :label-width="formLabelWidth">
+        <el-form-item label="当前用户" prop="username">{{ currentUserName }}</el-form-item>
+        <el-form-item :model="formData" label="请选择角色">
+          <el-select v-model="currentRoleId">
+            <el-option label="请选择" disabled :value="-1"></el-option>
+            <el-option
+              v-for="item in roles"
+              :label="item.roleName"
+              :value="item.id"
+              :key="item.id">
+            </el-option>
+          </el-select>
+      </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisibleEdit = false">取 消</el-button>
-        <el-button type="primary" @click="handleEditDialog">确 定</el-button>
+        <el-button @click="rolesFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleRole">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -165,7 +168,9 @@ export default {
       // 编辑用户信息弹出层显示状态的初始值
       dialogFormVisibleEdit: false,
       // 弹出框的高度
-      formLabelWidth: '80px',
+      formLabelWidth: '100px',
+      // 分配角色弹出层的默认状态
+      rolesFormVisible: false,
       formData: {
         username: '',
         password: '',
@@ -181,7 +186,12 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 8, message: '长度在 6 到 8 位之间', trigger: 'blur' }
         ]
-      }
+      },
+      // 分配角色需要的数据
+      currentUserName: '',
+      currentRoleId: -1,
+      currentUserId: -1,
+      roles: []
     };
   },
   created() {
@@ -215,7 +225,6 @@ export default {
         const { data: {users, total} } = data;
         // 将用户的值赋值给list
         this.list = users;
-        console.log(this.list);
         // 为state赋值
         this.state = users.mg_state;
         // 将total赋值给分页标签
@@ -240,7 +249,6 @@ export default {
     },
     // 点击编辑确定按钮，修改用户信息
     async handleEditDialog() {
-      console.log(this.formData);
       // 发送请求，修改用户数据
       const res = await this.$http.put(`users/${this.formData.id}`, {
         email: this.formData.email,
@@ -347,6 +355,35 @@ export default {
     closeClear() {
       for (let key in this.formData) {
         this.formData[key] = '';
+      }
+    },
+    // 点击分配角色按钮，显示弹出层
+    async rolesShowtDialog(user) {
+      this.currentUserName = user.username;
+      this.rolesFormVisible = true;
+      const res = await this.$http.get('roles');
+      this.roles = res.data.data;
+      // 根据用户id查询角色的id
+      const res1 = await this.$http.get(`users/${user.id}`);
+      const data = res1.data.data;
+      this.currentRoleId = data.rid;
+      this.currentUserId = data.id;
+    },
+    // 点击确定按钮，更改角色状态
+    async handleRole() {
+      this.rolesFormVisible = false;
+      // 发送请求，修改用户角色
+      const res = await this.$http.put(`users/${this.currentUserId}/role`,
+      {
+        rid: this.currentRoleId
+      });
+      const data = res.data;
+      const {meta: {msg, status}} = data;
+      if (status === 200) {
+        this.$message.success('角色修改成功');
+        this.loadData();
+      } else {
+        this.$message.error(msg);
       }
     }
   }
